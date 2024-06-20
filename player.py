@@ -21,11 +21,15 @@ class Player(pg.sprite.Sprite):
         self.delta_time = 0  # 两针之间的时间间隔
 
         # 直线移动
-        self.velocity_forward_lim = 400
-        self.velocity_backward_lim = 100
+        self.velocity_forward_lim = 600
+        self.velocity_backward_lim = 200
         self.velocity = 0
         self.acceleration = 300
         self.friction = 0.99
+        self.velocity_signal = 0
+        # XXXX self.velocity_signal = 1
+        # XXXX if self.velocity < 0: self.velocity_signal = -1  # 判断是前进还是倒车
+        # 这两端逻辑不能写在 __init__ 函数中, 因为这样, 它们只会被执行一次 (在实例化类的时候)
 
         # 转弯
         self.rotate_velocity = 0  # 角速度, 即每秒转动多少角度
@@ -50,17 +54,17 @@ class Player(pg.sprite.Sprite):
             self.velocity = int(self.friction * self.velocity)
 
         # 转向输入
-        velocity_signal = 1
-        if self.velocity < 0: velocity_signal = -1
+        self.velocity_signal = 1
+        if self.velocity < 0: self.velocity_signal = -1  # 判断是前进还是倒车
         if key_pressed[pg.K_d]:
-            self.rotate_velocity = self.rotate_velocity_lim * velocity_signal
+            self.rotate_velocity = self.rotate_velocity_lim * self.velocity_signal
         elif key_pressed[pg.K_a]:
-            self.rotate_velocity = - self.rotate_velocity_lim * velocity_signal
+            self.rotate_velocity = - self.rotate_velocity_lim * self.velocity_signal
         else:
             self.rotate_velocity = 0
 
-    def rotate(self, direction=1):
-        self.angle += self.rotate_velocity * self.delta_time * direction  # 撞墙后 direction 变成 -1
+    def rotate(self):
+        self.angle += self.rotate_velocity * self.delta_time
         self.image = pg.transform.scale(self.image_src, (self.width, self.height))
         self.image = pg.transform.rotate(self.image, -self.angle)
         self.image.set_colorkey("black")
@@ -68,25 +72,22 @@ class Player(pg.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = center
 
-    def move(self, direction=1):
-        if direction == 1 and abs(self.velocity) > 60: self.rotate(direction)  # 当速度超过60才可以转弯 且 当没有发生碰撞时才转弯
-
-        vx = self.velocity * math.cos(math.pi * self.angle / 180) * direction
-        vy = self.velocity * math.sin(math.pi * self.angle / 180) * direction
+    def move(self):
+        vx = self.velocity * math.cos(math.pi * self.angle / 180)
+        vy = self.velocity * math.sin(math.pi * self.angle / 180)
         self.rect.x += vx * self.delta_time
         self.rect.y += vy * self.delta_time
 
-        if direction == -1 and abs(self.velocity) > 60: self.rotate(direction)
+        if abs(self.velocity) > 60: self.rotate()  # 当速度绝对值超过60才可以转弯
 
     def crash(self):
-        self.move(-1)
-        self.velocity *= -0.4  # 弹性碰撞
-        self.velocity = min(self.velocity, - self.velocity_backward_lim)
-        # self.rotate_velocity *= -0.4 # 弹性碰撞
+        # self.velocity = - 0.8 * self.velocity  # 碰撞时, 速度反向; 但是这样写, 持续碰撞后, 速度趋于零, 不动了, 优化成以下写法
+        self.velocity = - 0.8 * self.velocity_signal * max(abs(self.velocity), self.velocity_backward_lim)
+        self.move()
 
     def update(self):  # 更新下一帧小车的位置
         self.update_delta_time()
         self.input()
-        self.move(1)
+        self.move()
 
 
