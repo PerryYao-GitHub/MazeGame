@@ -1,12 +1,12 @@
 # 创建GameManager来管理游戏对象
 import pygame as pg
-
-from components.star import Star
-from components.target import Target
-from utils.collide import collide_rect
+import os
 
 from components.player import Player
 from components.wall import Wall
+from components.base_item import Star
+from components.base_item import Target
+from utils.collide import collide_rect, collide_circle
 
 class GameManager:
     def __init__(self, screen):
@@ -19,9 +19,17 @@ class GameManager:
 
         self.stars = pg.sprite.Group()
         self.stars_cnt = 0  # 将星星维护起来
+        self.eat_starts_audio = pg.mixer.Sound("static/audio/eat_stars.wav")
+        self.eat_starts_audio.set_volume(0.2)
 
         self.targets_cnt = 0
         self.targets = pg.sprite.Group()
+        self.success_audio = pg.mixer.Sound("static/audio/success.wav")
+        self.success_audio.set_volume(0.2)
+        self.has_success = False
+        self.success_time = -1
+
+        self.level = 1  # 关卡数
 
         # 加载以上 components
         self.load()
@@ -49,7 +57,11 @@ class GameManager:
             target.add(self.targets)
 
     def load(self):
-        with open("static/level/level_1.txt") as fin:
+        self.success_time = -1  # load 新关卡, 重置获胜时刻
+        self.has_success = False  # load 新的关卡, 重置当前获胜状态
+        if not os.path.isfile("static/level/level_{}.txt".format(self.level)): return False
+
+        with open("static/level/level_{}.txt".format(self.level)) as fin:
             # 先 load player 信息
             player_center_x, player_center_y, player_angle = map(int, fin.readline().split())
             self.load_player(player_center_x, player_center_y, player_angle)
@@ -77,6 +89,13 @@ class GameManager:
     def check_collide(self):
         if pg.sprite.spritecollide(self.player, self.walls, False, collide_rect):  # 返回一个列表, 展示与哪些墙碰撞了
             self.player.crash()
+        if pg.sprite.spritecollide(self.player, self.stars, True, collide_circle):
+            self.stars_cnt -= 1
+            self.eat_starts_audio.play()
+
+        if self.stars_cnt == 0 and pg.sprite.spritecollide(self.player, self.targets, True, collide_circle):
+            self.success_audio.play()
+            self.has_success = True
 
     def update(self):
         # update star
@@ -97,4 +116,13 @@ class GameManager:
 
         # update 屏幕
         self.screen.blit(self.player.image, self.player.rect)
+
+        if self.has_success:
+            self.success_time = pg.time.get_ticks()
+            if pg.time.get_ticks() - self.success_time > 3000:
+                self.level += 1
+                self.load()
+
+
+
 

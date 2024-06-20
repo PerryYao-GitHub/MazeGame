@@ -44,7 +44,7 @@ class Player(pg.sprite.Sprite):
         self.crash_audio = pg.mixer.Sound(crash_audio_path)
         self.crash_audio.set_volume(0.2)
         self.move_audio = pg.mixer.Sound(move_audio_path)
-        self.move_audio.set_volume(0.2)
+        self.move_audio.set_volume(0.3)
         self.move_audio_channel = pg.mixer.Channel(7)
 
 
