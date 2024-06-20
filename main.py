@@ -3,6 +3,8 @@ import config
 from game_manager import GameManager
 
 pg.init()
+pg.mixer.init()
+
 screen = pg.display.set_mode((config.SCREEN_WIDTH, config.SCREEN_HEIGHT))
 clock = pg.time.Clock()
 
