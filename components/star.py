@@ -17,5 +17,14 @@ class Star(pg.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = (star_center_x, star_center_y)  # 中心坐标 ****
 
+        self.scale = 1
+        self.scale_delta = 0.01
+
     def update(self):
-        pass
+        self.scale += self.scale_delta
+        if self.scale > 1.1 or self.scale < 0.9:
+            self.scale_delta *= -1
+        center = self.rect.center
+        self.rect = self.image.get_rect()
+        self.rect.center = center
+        self.image = pg.transform.scale(self.image_src, (self.width * self.scale, self.height * self.scale))
