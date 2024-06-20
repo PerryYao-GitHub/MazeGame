@@ -2,8 +2,9 @@ import pygame as pg
 import os
 import config
 import math
+
 base_dir = os.path.dirname(os.path.dirname(__file__))  # 从components目录回到主目录
-image_path = os.path.join(base_dir, 'static', 'img', 'car.png')
+car_path = os.path.join(base_dir, 'static', 'img', 'car.png')
 crash_audio_path = os.path.join(base_dir, 'static', 'audio', 'crash.mp3')
 move_audio_path = os.path.join(base_dir, 'static', 'audio', 'move.mp3')
 
@@ -15,7 +16,7 @@ class Player(pg.sprite.Sprite):
         self.height = config.PLAYER_HEIGHT
         self.angle = player_angle  # 车头与x轴正方向的夹角 ****
         # self.image_src = pg.image.load("../static/img/car.png").convert()  # 把原图存下来
-        self.image_src = pg.image.load(image_path).convert()
+        self.image_src = pg.image.load(car_path).convert()
         self.image = pg.transform.scale(self.image_src, (self.width, self.height))
         self.image = pg.transform.rotate(self.image, -self.angle)
         self.image.set_colorkey("black")
