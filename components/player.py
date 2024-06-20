@@ -1,6 +1,11 @@
 import pygame as pg
+import os
 import config
 import math
+base_dir = os.path.dirname(os.path.dirname(__file__))  # 从components目录回到主目录
+image_path = os.path.join(base_dir, 'static', 'img', 'car.png')
+crash_audio_path = os.path.join(base_dir, 'static', 'audio', 'crash.mp3')
+move_audio_path = os.path.join(base_dir, 'static', 'audio', 'move.mp3')
 
 class Player(pg.sprite.Sprite):
     def __init__(self, player_center_x, player_center_y, player_angle):
@@ -9,7 +14,8 @@ class Player(pg.sprite.Sprite):
         self.width = config.PLAYER_WIDTH
         self.height = config.PLAYER_HEIGHT
         self.angle = player_angle  # 车头与x轴正方向的夹角 ****
-        self.image_src = pg.image.load("static/img/car.png").convert()  # 把原图存下来
+        # self.image_src = pg.image.load("../static/img/car.png").convert()  # 把原图存下来
+        self.image_src = pg.image.load(image_path).convert()
         self.image = pg.transform.scale(self.image_src, (self.width, self.height))
         self.image = pg.transform.rotate(self.image, -self.angle)
         self.image.set_colorkey("black")
@@ -27,16 +33,16 @@ class Player(pg.sprite.Sprite):
         self.velocity_signal = 0
         # XXXX self.velocity_signal = 1
         # XXXX if self.velocity < 0: self.velocity_signal = -1  # 判断是前进还是倒车
-        # 这两端逻辑不能写在 __init__ 函数中, 因为这样, 它们只会被执行一次 (在实例化类的时候)
+        # 这两段逻辑不能写在 __init__ 函数中, 因为这样, 它们只会被执行一次 (在实例化类的时候)
 
         # 转弯
         self.rotate_velocity = 0  # 角速度, 即每秒转动多少角度
         self.rotate_velocity_lim = 120
 
         # 音效
-        self.crash_audio = pg.mixer.Sound("static/audio/crash.mp3")
+        self.crash_audio = pg.mixer.Sound(crash_audio_path)
         self.crash_audio.set_volume(0.2)
-        self.move_audio = pg.mixer.Sound("static/audio/move.mp3")
+        self.move_audio = pg.mixer.Sound(move_audio_path)
         self.move_audio.set_volume(0.2)
         self.move_audio_channel = pg.mixer.Channel(7)
 

@@ -1,8 +1,9 @@
 # 创建GameManager来管理游戏对象
 import pygame as pg
-from player import Player
-from wall import Wall
 from utils.collide import collide_rect
+
+from components.player import Player
+from components.wall import Wall
 
 class GameManager:
     def __init__(self, screen):
