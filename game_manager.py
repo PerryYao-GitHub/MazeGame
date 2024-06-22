@@ -28,7 +28,7 @@ class GameManager:
         self.success_audio.set_volume(0.2)
         self.has_success = False
         self.success_time = -1
-
+        self.level_exists = True  # 当前关卡是否存在
         self.level = 1  # 关卡数
 
         # 加载以上 components
@@ -59,7 +59,9 @@ class GameManager:
     def load(self):
         self.success_time = -1  # load 新关卡, 重置获胜时刻
         self.has_success = False  # load 新的关卡, 重置当前获胜状态
-        if not os.path.isfile("static/level/level_{}.txt".format(self.level)): return False
+        if not os.path.isfile("static/level/level_{}.txt".format(self.level)):
+            self.level_exists = False  # 如果没有当前关卡, level_exists = False
+            return 0
 
         with open("static/level/level_{}.txt".format(self.level)) as fin:
             # 先 load player 信息
@@ -118,10 +120,11 @@ class GameManager:
         self.screen.blit(self.player.image, self.player.rect)
 
         if self.has_success:
-            self.success_time = pg.time.get_ticks()
-            if pg.time.get_ticks() - self.success_time > 3000:
-                self.level += 1
-                self.load()
+            if self.success_time < 0:  # 如果是刚刚成功，记录时间
+                self.success_time = pg.time.get_ticks()
+            elif pg.time.get_ticks() - self.success_time > 4000:  # 检查是否已经过了足够的时间 (例如 4000 毫秒)
+                    self.level += 1
+                    self.load()
 
 
 
