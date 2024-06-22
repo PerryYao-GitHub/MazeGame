@@ -8,6 +8,9 @@ pg.mixer.init()
 
 screen = pg.display.set_mode((config.SCREEN_WIDTH, config.SCREEN_HEIGHT))
 clock = pg.time.Clock()
+ico = pg.image.load("static/img/maze.png").convert()
+pg.display.set_icon(ico)
+pg.display.set_caption("Car Maze")
 
 pg.mixer.music.load("static/audio/bgm.wav")
 pg.mixer.music.set_volume(0.1)
